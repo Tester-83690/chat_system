@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+</head>
+<body>
+    <h1>Admin Panel</h1>
+    <h2>Users with Messages</h2>
+    <div id="userList"></div>
+    <div id="chatWindow"></div>
+    <form id="replyForm" style="display: none;">
+        <input type="text" id="replyInput" placeholder="Type your reply" required />
+        <button type="submit">Send Reply</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const userList = document.getElementById('userList');
+        const chatWindow = document.getElementById('chatWindow');
+        const replyForm = document.getElementById('replyForm');
+
+        // Listen for users with messages
+        socket.on('userList', (users) => {
+            userList.innerHTML = ''; // Clear the list
+            users.forEach(user => {
+                const userItem = document.createElement('p');
+                userItem.textContent = user;
+                userItem.addEventListener('click', () => {
+                    socket.emit('selectUser', user);
+                });
+                userList.appendChild(userItem);
+            });
+        });
+
+        // Display chat history with a selected user
+        socket.on('chatHistory', (history) => {
+            chatWindow.innerHTML = ''; // Clear the chat
+            history.forEach(message => {
+                const msg = document.createElement('p');
+                msg.textContent = message;
+                chatWindow.appendChild(msg);
+            });
+            replyForm.style.display = 'block'; // Show reply form
+        });
+
+        // Send admin's reply
+        replyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const reply = document.getElementById('replyInput').value;
+            socket.emit('adminReply', { username: 'user123', message: reply });
+            document.getElementById('replyInput').value = '';
+        });
+    </script>
+</body>
+</html>
