@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Chat</title>
+</head>
+<body>
+    <h1>Chat with Admin</h1>
+    <div id="chatWindow"></div>
+    <form id="chatForm">
+        <input type="text" id="messageInput" placeholder="Type your message" required />
+        <button type="submit">Send</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+        const chatWindow = document.getElementById('chatWindow');
+        const form = document.getElementById('chatForm');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const message = document.getElementById('messageInput').value;
+            socket.emit('userMessage', { username: 'user123', message });
+            document.getElementById('messageInput').value = '';
+        });
+
+        socket.on('adminResponse', (data) => {
+            const msg = document.createElement('p');
+            msg.textContent = `Admin: ${data.message}`;
+            chatWindow.appendChild(msg);
+        });
+    </script>
+</body>
+</html>
